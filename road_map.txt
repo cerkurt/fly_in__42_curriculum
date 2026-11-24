@@ -1,0 +1,328 @@
+Roadmap & todo list
+---
+
+Phase 1 — Project Setup & Architecture
+Hedef: Kod yazmaya başlamadan önce sürdürülebilir bir proje yapısı kurmak.
+✅ Git repository'yi oluştur ve Python 3.10+ ortamını doğrula.
+✅ Virtual environment oluştur; flake8, mypy ve test araçlarını kur.
+✅ Makefile'a install, run, debug, clean ve lint target'larını ekle.
+✅ lint target'ını subject'teki flake8 ve mypy flag'leriyle birebir yapılandır.
+✅ Python cache, virtual environment ve test artifact'leri için .gitignore oluştur.
+[ ] Zone, Connection, Drone, Graph, Parser, PathFinder ve SimulationEngine sorumluluklarını tasarla.
+    [ ] Her class için tek cümlelik sorumluluk tanımı yaz. Bu class'ın neden var olduğunu açıklayabilmelisin.
+    [ ] Her class'ın attribute'larını listele. Örneğin Drone: id, current_zone, route, status.
+    [ ] Her class için 2–4 temel metod belirle. Metod imzalarını tasarla; içlerini henüz yazma.
+    [ ] Class'lar arasındaki ilişkileri çiz. Hangisi hangisini oluşturuyor, hangisi hangisini kullanıyor?
+    [ ] Yukarıdaki örneğin veri akışını elle simüle et. Aynı turda iki drone nereye hareket ediyor?
+    [ ] Restricted zone ve kapasite çakışması için iki edge case düşün. 2 turluk geçiş sırasında drone'un konumu nerede tutulacak?
+✅ Class ilişkilerini ve veri akışını basit bir UML veya şema üzerinde planla.
+[ ] İlk boş uygulamanın make run, make lint ve make debug ile çalıştığını doğrula.
+
+fly_in/
+├── Makefile
+├── README.md
+├── .gitignore
+├── main.py
+├── fly_in/
+│   ├── __init__.py
+│   ├── models.py
+│   ├── graph.py
+│   ├── parser.py
+│   ├── pathfinding.py
+│   ├── scheduler.py
+│   ├── simulation.py
+│   └── visualization.py
+├── maps/
+└── tests/
+
+---
+
+Phase 2 — Parser & Input Validation
+Hedef: Verilen herhangi bir geçerli map dosyasını Python nesnelerine dönüştürmek; geçersiz dosyaları kontrollü biçimde reddetmek.
+[ ] Dosyayı context manager (with open) kullanarak oku.
+[ ] Boş satırları ve # ile başlayan yorumları işle; geçerli satır numaralarını koru.
+[ ] İlk satırdaki nb_drones değerini parse et ve pozitif integer olduğunu doğrula.
+[ ] start_hub, end_hub ve hub satırlarını parse et.
+[ ] Zone adlarını ve integer x, y koordinatlarını doğrula.
+[ ] Metadata parser oluştur: zone, color, max_drones.
+[ ] Varsayılanları uygula: normal zone, color=none, max_drones=1.
+[ ] connection satırlarını parse et; max_link_capacity default=1 uygula.
+[ ] Bağlantıları iki yönlü olarak modelle.
+[ ] Tüm duplicate, unknown reference, invalid syntax ve invalid capacity durumlarını yakala.
+[ ] Start/end için max_drones metadata'sını kapasite sınırlaması olarak uygulama.
+[ ] Her parsing hatasında satır numarası ve anlaşılır sebep göster.
+[ ] Parser için valid ve invalid input testleri yaz.
+
+nb_drones: 3
+start_hub: start 0 0
+end_hub: goal 4 0
+hub: A 1 0 [zone=normal max_drones=2]
+hub: B 2 0 [zone=restricted color=red]
+connection: start-A
+connection: A-B
+connection: B-goal
+
+---
+
+Phase 3 — Graph Representation & Pathfinding
+Hedef: Drone'ların start ile end arasındaki geçerli yollarını bulmak.
+[ ] Graph class'ını adjacency list kullanarak oluştur.
+[ ] Zone ve Connection nesnelerini graph içerisinde sakla.
+[ ] Bidirectional connection erişimini doğrula.
+[ ] Blocked zone'ları pathfinding dışında bırak.
+[ ] Start ile end arasında bağlantı olup olmadığını kontrol et.
+[ ] İlk olarak BFS ile basit shortest path algoritması geliştir.
+[ ] Restricted zone için 2, normal/priority zone için 1 movement cost uygula.
+[ ] Weighted shortest path için Dijkstra algoritmasını uygula.
+[ ] Eşit maliyetli yollar arasında priority zone tercihini tasarla.
+[ ] Birden fazla alternatif yol bulabilen bir yaklaşım oluştur.
+[ ] Disconnected graph, cycle, dead end ve tek bağlantılı yolları test et.
+[ ] Pathfinding sonuçlarını tekrar kullanmak için caching ihtiyacını değerlendir.
+
+
+Algoritma	Görevi
+BFS	Basit, eşit maliyetli graph üzerinde en kısa yolu bulmak
+Dijkstra	Restricted zone gibi farklı movement cost'ları hesaba katmak
+Multi-path routing	Birden fazla drone'u farklı rotalara dağıtmak
+
+Önemli: En kısa yol, her zaman bütün drone'lar için en hızlı çözüm değildir. 
+Tek bir kısa rota kapasite yüzünden tıkanabilirken, biraz daha uzun ikinci bir 
+rota toplam teslim süresini azaltabilir. Örnek: İki alternatif rota
+İki paralel rota, aynı dar geçide bütün drone'ları göndermekten daha yüksek 
+throughput sağlayabilir.
+
+Phase tamamlanma kriteri: Geçerli rotaları bulabiliyor, blocked zone'lardan 
+kaçınıyor ve weighted cost'ları doğru hesaplıyorsun.
+
+---
+
+Phase 4 — Core Simulation Engine
+Hedef: Drone'ları gerçek turn'ler üzerinden hareket ettirmek.
+[ ] Her drone için benzersiz ID, konum, hedef rota ve hareket durumunu sakla.
+[ ] Bütün drone'ları başlangıçta start zone'a yerleştir.
+[ ] Discrete turn loop oluştur.
+[ ] Her turn başında zone occupancy ve connection usage bilgilerini hesapla.
+[ ] Her drone için move veya wait kararı üret.
+[ ] Bir turn içerisinde aynı drone'un birden fazla hareket etmesini engelle.
+[ ] Normal zone'a girişin 1 turn sürdüğünü uygula.
+[ ] Start ve end zone'ları sınırsız kapasiteyle işle.
+[ ] Bir zone'dan çıkan drone'un aynı turn içerisinde kapasite boşaltmasını destekle.
+[ ] Aynı turn içindeki hareketleri eşzamanlı olarak değerlendir ve uygula.
+[ ] End zone'a ulaşan drone'u delivered olarak işaretle.
+[ ] Bütün drone'lar teslim edildiğinde simülasyonu bitir.
+[ ] Deadlock veya ilerleme olmaması durumları için güvenli kontrol oluştur.
+
+Buradaki en önemli tasarım kararı two-phase update kullanmak.
+
+TURN START
+    |
+    v
+Read current state
+    |
+    v
+Collect proposed movements
+    |
+    v
+Resolve capacity conflicts
+    |
+    v
+Commit all valid movements together
+    |
+    v
+Update drone states
+    |
+    v
+TURN END
+
+Phase tamamlanma kriteri: Basit map'lerde bütün drone'lar çarpışmadan hedefe 
+ulaşıyor ve her turn deterministik şekilde ilerliyor.
+
+---
+
+Phase 5 — Advanced Movement & Capacity Rules
+Hedef: Subject'in en kritik hareket kurallarını eksiksiz uygulamak.
+[ ] max_drones=N kapasitesini her normal, restricted ve priority zone için uygula.
+[ ] max_link_capacity=N sınırını her iki yöndeki toplam eşzamanlı kullanım için uygula.
+[ ] Restricted zone'a girişin tam 2 turn sürmesini sağla.
+[ ] Restricted zone'a giderken ilk turn'de drone'u connection üzerinde in-flight durumuna geçir.
+[ ] İkinci turn'de drone'un mutlaka restricted zone'a varmasını sağla.
+[ ] Restricted zone'da varış kapasitesini harekete başlamadan önce garanti altına al.
+[ ] In-flight drone'ların connection kapasitesini doğru kullanmasını sağla.
+[ ] Aynı turn'de bir drone çıkarken başka drone'un zone'a girmesini destekle.
+[ ] Çakışan hareket taleplerinde güvenli bekleme kararı ver.
+[ ] Head-on movement ve dar boğaz senaryolarını test et.
+[ ] Döngüsel beklemeler ve deadlock senaryoları için testler oluştur.
+
+Restricted zone neden özel?
+Örnek: A → B (restricted)
+Başlangıç
+
+A
+Drone A'da
+
+Turn 1
+
+A-B
+Connection üzerinde
+
+Turn 2
+
+B
+Varış zorunlu
+
+
+Burada kritik problem şu: Drone restricted zone'a doğru uçmaya başladıktan 
+sonra connection üzerinde fazladan bekleyemez. Dolayısıyla scheduler yalnızca 
+mevcut turn'ün kapasitesine bakmamalı. Gelecekteki varış turn'ü için de kapasite
+planlaması yapmalı. Bunun için bir reservation sistemi tasarlamanı öneriyorum.
+
+Phase tamamlanma kriteri: Restricted hareketler, zone ve connection 
+kapasiteleri, eşzamanlı giriş/çıkış ve beklemeler hatasız çalışıyor.
+
+---
+
+Phase 6 — Multi-Path Optimization
+Hedef: Sadece geçerli değil, düşük turn sayılı çözümler üretmek.
+[ ] İlk çözümün toplam turn sayısını baseline olarak kaydet.
+[ ] Tek shortest path kullanımının darboğazlarını tespit et.
+[ ] Alternatif path'leri path cost ve kapasiteye göre değerlendir.
+[ ] Drone'ları birden fazla rota arasında dağıtan algoritma oluştur.
+[ ] Path throughput ve bottleneck capacity hesaplamalarını tasarla.
+[ ] Drone'ların start'tan hangi turn'de çıkacağını optimize et.
+[ ] Gerektiğinde drone'ları bilinçli olarak beklet.
+[ ] Priority zone'ları eşit maliyetli seçeneklerde tercih et.
+[ ] Her turn'de mümkün olan güvenli hareketleri artır.
+[ ] Path reservation ve congestion-aware scheduling uygula.
+[ ] Farklı path dağılımlarının toplam turn sayılarını karşılaştır.
+[ ] Gerektiğinde farklı map topolojileri için farklı strateji kullan.
+[ ] Pathfinding sonuçlarını cache'leyerek gereksiz hesaplamaları azalt.
+[ ] Sonuçları subject benchmark'larıyla karşılaştır.
+
+Burası projenin algoritmik açıdan en zor bölümü olabilir.
+
+Başlangıçta Dijkstra + basit path distribution kullanabilirsin. Ancak bu
+kombinasyonun tek başına bütün benchmark'ları karşılayacağını varsayma.
+Özellikle paylaşılan zone'lar, farklı connection kapasiteleri ve restricted
+hareketler nedeniyle gerçek zamanlamayı hesaba katan bir scheduler gerekli.
+
+İlk çalışan çözümünü bozmadan optimizasyon yapmanı öneriyorum. Böylece her
+iyileştirmenin gerçekten turn sayısını azaltıp azaltmadığını ölçebilirsin.
+
+Phase tamamlanma kriteri: Birden fazla path kullanılıyor, congestion
+yönetiliyor ve benchmark hedeflerine yaklaşan veya onları karşılayan sonuçlar
+elde ediliyor.
+
+---
+
+Phase 7 — Output & Visualization
+Hedef: Subject'in istediği çıktıyı ve zorunlu görsel geri bildirimi sağlamak.
+[ ] Her turn için tam bir movement log satırı üret.
+[ ] D<ID>-<zone> formatını uygula.
+[ ] Restricted zone'a uçuş sırasında D<ID>-<connection> formatını kullan.
+[ ] Hareket etmeyen drone'ları log satırına dahil etme.
+[ ] Delivered drone'ların sonraki turn'lerde tekrar görünmesini engelle.
+[ ] Drone ID sıralamasını deterministik tut.
+[ ] Terminal renkleriyle zone type veya drone state'lerini göster.
+[ ] Normal hareket log'unu renkli görselleştirmeden ayır.
+[ ] Renkli ve renksiz çıktıların kullanılabilirliğini test et.
+[ ] Görsel temsilin nasıl çalıştığını README'de açıkla.
+
+Örnek movement log:
+D1-roof1 D2-corridorA
+D1-roof2 D2-tunnelB
+D1-goal D2-goal
+
+
+Önerim: GUI yapmak yerine colored terminal visualization kullan.
+Subject'e göre ikisinden biri yeterli. Böylece zamanını daha önemli olan
+pathfinding ve scheduling optimizasyonuna ayırabilirsin.
+
+---
+
+Phase 8 — Testing & Performance Benchmarks
+Hedef: Evaluation sırasında farklı map'lerle karşılaştığında sistemin güvenilir kalması.
+[ ] Parser için positive ve negative unit test'leri tamamla.
+[ ] Pathfinding için blocked, disconnected, weighted ve cyclic graph testlerini tamamla.
+[ ] Simulation için her turn sonunda zone occupancy invariant'larını kontrol et.
+[ ] Connection capacity invariant'larını test et.
+[ ] Restricted movement'ın tam 2 turn sürdüğünü doğrula.
+[ ] Delivered drone sayısının doğru olduğunu kontrol et.
+[ ] Hiçbir drone'un kaybolmadığını veya iki konumda birden bulunmadığını doğrula.
+[ ] Farklı drone sayıları ve yüksek kapasiteli bağlantılarla test et.
+[ ] Random küçük map'lerle stress test yap.
+[ ] Bütün subject benchmark map'lerini çalıştır.
+[ ] Turn sayısı, execution time ve başarısız testleri raporla.
+[ ] Regression test oluştur; optimizasyonların eski doğru davranışları bozmadığını kontrol et.
+[ ] make lint ile flake8 ve mypy hatalarını sıfırla.
+[ ] Geçersiz map'lerde traceback yerine kontrollü hata mesajı verildiğini doğrula.
+
+---
+
+Phase 9 — README, Final Checks & Evaluation
+Hedef: Teslimata ve peer evaluation'a tamamen hazır olmak.
+[ ] README.md dosyasının ilk satırını subject'teki zorunlu italic formatta yaz.
+[ ] Description, Instructions ve Resources bölümlerini ekle.
+[ ] Algoritma seçimlerini ve implementation strategy'yi detaylandır.
+[ ] Time ve space complexity analizini yaz.
+[ ] Visual representation özelliklerini ve faydalarını açıkla.
+[ ] AI kullanımını ve yararlandığın kaynakları belgele.
+[ ] README'nin tamamını İngilizce yaz.
+[ ] Makefile'ın bütün zorunlu target'larını test et.
+[ ] Projenin tamamen object-oriented olduğunu doğrula.
+[ ] Tüm fonksiyonlarda type hint ve PEP 257 docstring bulunduğunu kontrol et.
+[ ] mypy ve flake8 hatalarını gider.
+[ ] Yeni ve daha önce görmediğin bir map üzerinde test yap.
+[ ] Evaluation için BFS, Dijkstra, capacity scheduling ve deadlock konularını tekrar et.
+[ ] Küçük bir kod değişikliğini kendi başına yapabilecek kadar mimariye hâkim ol.
+[ ] Git repository'deki son dosyaları ve commit'leri kontrol et.
+
+---
+
+
+Önerdiğim çalışma sırası
+Bütün phase'leri tek seferde bitirmeye çalışmak yerine üç milestone oluşturmanı
+öneriyorum.
+
+Milestone 1 — Working Prototype
+
+Phase 1–4
+
+Parser çalışıyor, graph oluşturuluyor, temel pathfinding yapılıyor ve basit
+map'lerde drone'lar hedefe ulaşıyor.
+
+
+
+
+Milestone 2 — Mandatory Functionality
+
+Phase 5–7
+
+Bütün hareket ve kapasite kuralları uygulanıyor, multi-path routing çalışıyor,
+geçerli log ve visualization üretiliyor.
+
+
+
+
+Milestone 3 — Evaluation Ready
+
+Phase 8–9
+
+Benchmark optimizasyonları tamamlanıyor, edge case testleri geçiyor, lint
+temiz ve README hazır.
+
+
+---
+
+Başlamadan önce bilmeni istediğim 4 önemli şey
+1. BFS tek başına yeterli olmayacak. Restricted zone'ların maliyetleri farklı
+ve birden fazla drone aynı ağı paylaşıyor. Weighted pathfinding ve scheduling'i
+birlikte düşünmelisin.
+2. Simulation ile pathfinding'i ayrı tut. Pathfinding hangi rotaların
+kullanılabileceğini belirlesin; scheduler hangi drone'un ne zaman hareket
+edeceğine karar versin; simulation engine ise kararların kurallara uygun
+şekilde uygulanmasını sağlasın.
+3. Testleri en sona bırakma. Özellikle parser ve capacity kontrollerinde, her
+phase sonrasında unit test yazmak çok zaman kazandıracak.
+4. Optimizasyona geçmeden önce doğru çalışan bir baseline oluştur.
+İlk versiyon yavaş olabilir. Önemli olan, sonrasında yaptığın her değişikliği
+güvenilir şekilde karşılaştırabilmen.
