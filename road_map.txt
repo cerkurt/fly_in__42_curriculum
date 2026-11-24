@@ -9,7 +9,7 @@ Hedef: Kod yazmaya başlamadan önce sürdürülebilir bir proje yapısı kurmak
 ✅ lint target'ını subject'teki flake8 ve mypy flag'leriyle birebir yapılandır.
 ✅ Python cache, virtual environment ve test artifact'leri için .gitignore oluştur.
 [ ] Zone, Connection, Drone, Graph, Parser, PathFinder ve SimulationEngine sorumluluklarını tasarla.
-    [ ] Her class için tek cümlelik sorumluluk tanımı yaz. Bu class'ın neden var olduğunu açıklayabilmelisin.
+    ✅ Her class için tek cümlelik sorumluluk tanımı yaz. Bu class'ın neden var olduğunu açıklayabilmelisin.
     [ ] Her class'ın attribute'larını listele. Örneğin Drone: id, current_zone, route, status.
     [ ] Her class için 2–4 temel metod belirle. Metod imzalarını tasarla; içlerini henüz yazma.
     [ ] Class'lar arasındaki ilişkileri çiz. Hangisi hangisini oluşturuyor, hangisi hangisini kullanıyor?
