@@ -55,20 +55,3 @@ class Drone:
     position: Zone | Connection
     transit_destination: Zone | None = None
     route: list[Zone] | None = None
-
-
-class Graph:
-    """Manages the Zone and Connection objects and their neighborhood
-    relationship."""
-
-
-class Parser:
-    """Reads the text files, validates and turns them into objects."""
-
-
-class Pathfinder:
-    """Calculates the available routes and their costs on graph"""
-
-
-class SimulationEngine:
-    """Manages the tours, drone movements, waits and capacity controls."""

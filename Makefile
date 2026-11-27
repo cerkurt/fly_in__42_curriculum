@@ -1,7 +1,7 @@
 export PATH := $(HOME)/.local/bin:$(PATH)
 
 UV = $(HOME)/.local/bin/uv
-MAP ?= maps/easy_01.txt
+MAP ?= maps/easy/01_linear_path.txt
 
 .PHONY: install run debug clean lint lint-strict
 
@@ -14,10 +14,10 @@ install:
 	uv sync
 
 run:
-	uv run python main.py $(MAP)
+	uv run python fly_in.py $(MAP)
 
 debug:
-	uv run python -m pdb main.py $(MAP)
+	uv run python -m pdb fly_in.py $(MAP)
 
 clean:
 	find . -type d -name "__pycache__" -prune -exec rm -rf {} +

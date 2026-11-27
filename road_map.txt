@@ -8,49 +8,32 @@ Hedef: Kod yazmaya başlamadan önce sürdürülebilir bir proje yapısı kurmak
 ✅ Makefile'a install, run, debug, clean ve lint target'larını ekle.
 ✅ lint target'ını subject'teki flake8 ve mypy flag'leriyle birebir yapılandır.
 ✅ Python cache, virtual environment ve test artifact'leri için .gitignore oluştur.
-[ ] Zone, Connection, Drone, Graph, Parser, PathFinder ve SimulationEngine sorumluluklarını tasarla.
+✅ Zone, Connection, Drone, Graph, Parser, PathFinder ve SimulationEngine sorumluluklarını tasarla.
     ✅ Her class için tek cümlelik sorumluluk tanımı yaz. Bu class'ın neden var olduğunu açıklayabilmelisin.
-    [ ] Her class'ın attribute'larını listele. Örneğin Drone: id, current_zone, route, status.
-    [ ] Her class için 2–4 temel metod belirle. Metod imzalarını tasarla; içlerini henüz yazma.
-    [ ] Class'lar arasındaki ilişkileri çiz. Hangisi hangisini oluşturuyor, hangisi hangisini kullanıyor?
-    [ ] Yukarıdaki örneğin veri akışını elle simüle et. Aynı turda iki drone nereye hareket ediyor?
-    [ ] Restricted zone ve kapasite çakışması için iki edge case düşün. 2 turluk geçiş sırasında drone'un konumu nerede tutulacak?
+    ✅ Her class'ın attribute'larını listele. Örneğin Drone: id, current_zone, route, status.
+    ✅ Her class için 2–4 temel metod belirle. Metod imzalarını tasarla; içlerini henüz yazma.
+    ✅ Class'lar arasındaki ilişkileri çiz. Hangisi hangisini oluşturuyor, hangisi hangisini kullanıyor?
+    ✅ Yukarıdaki örneğin veri akışını elle simüle et. Aynı turda iki drone nereye hareket ediyor?
+    ✅ Restricted zone ve kapasite çakışması için iki edge case düşün. 2 turluk geçiş sırasında drone'un konumu nerede tutulacak?
 ✅ Class ilişkilerini ve veri akışını basit bir UML veya şema üzerinde planla.
-[ ] İlk boş uygulamanın make run, make lint ve make debug ile çalıştığını doğrula.
-
-fly_in/
-├── Makefile
-├── README.md
-├── .gitignore
-├── main.py
-├── fly_in/
-│   ├── __init__.py
-│   ├── models.py
-│   ├── graph.py
-│   ├── parser.py
-│   ├── pathfinding.py
-│   ├── scheduler.py
-│   ├── simulation.py
-│   └── visualization.py
-├── maps/
-└── tests/
+✅ İlk boş uygulamanın make run, make lint ve make debug ile çalıştığını doğrula.
 
 ---
 
 Phase 2 — Parser & Input Validation
 Hedef: Verilen herhangi bir geçerli map dosyasını Python nesnelerine dönüştürmek; geçersiz dosyaları kontrollü biçimde reddetmek.
-[ ] Dosyayı context manager (with open) kullanarak oku.
-[ ] Boş satırları ve # ile başlayan yorumları işle; geçerli satır numaralarını koru.
-[ ] İlk satırdaki nb_drones değerini parse et ve pozitif integer olduğunu doğrula.
-[ ] start_hub, end_hub ve hub satırlarını parse et.
+✅ Dosyayı context manager (with open) kullanarak oku.
+✅ Boş satırları ve # ile başlayan yorumları işle; geçerli satır numaralarını koru.
+✅ İlk satırdaki nb_drones değerini parse et ve pozitif integer olduğunu doğrula.
+✅ start_hub, end_hub ve hub satırlarını parse et.
 [ ] Zone adlarını ve integer x, y koordinatlarını doğrula.
-[ ] Metadata parser oluştur: zone, color, max_drones.
-[ ] Varsayılanları uygula: normal zone, color=none, max_drones=1.
-[ ] connection satırlarını parse et; max_link_capacity default=1 uygula.
-[ ] Bağlantıları iki yönlü olarak modelle.
-[ ] Tüm duplicate, unknown reference, invalid syntax ve invalid capacity durumlarını yakala.
-[ ] Start/end için max_drones metadata'sını kapasite sınırlaması olarak uygulama.
-[ ] Her parsing hatasında satır numarası ve anlaşılır sebep göster.
+✅ Metadata parser oluştur: zone, color, max_drones.
+✅ Varsayılanları uygula: normal zone, color=none, max_drones=1.
+✅ connection satırlarını parse et; max_link_capacity default=1 uygula.
+✅ Bağlantıları iki yönlü olarak modelle.
+✅  Tüm duplicate, unknown reference, invalid syntax ve invalid capacity durumlarını yakala.
+✅  Start/end için max_drones metadata'sını kapasite sınırlaması olarak uygulama.
+✅ Her parsing hatasında satır numarası ve anlaşılır sebep göster.
 [ ] Parser için valid ve invalid input testleri yaz.
 
 nb_drones: 3
