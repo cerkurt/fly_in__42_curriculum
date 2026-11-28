@@ -26,7 +26,7 @@ Hedef: Verilen herhangi bir geçerli map dosyasını Python nesnelerine dönüş
 ✅ Boş satırları ve # ile başlayan yorumları işle; geçerli satır numaralarını koru.
 ✅ İlk satırdaki nb_drones değerini parse et ve pozitif integer olduğunu doğrula.
 ✅ start_hub, end_hub ve hub satırlarını parse et.
-[ ] Zone adlarını ve integer x, y koordinatlarını doğrula.
+✅ Zone adlarını ve integer x, y koordinatlarını doğrula.
 ✅ Metadata parser oluştur: zone, color, max_drones.
 ✅ Varsayılanları uygula: normal zone, color=none, max_drones=1.
 ✅ connection satırlarını parse et; max_link_capacity default=1 uygula.
@@ -34,7 +34,7 @@ Hedef: Verilen herhangi bir geçerli map dosyasını Python nesnelerine dönüş
 ✅  Tüm duplicate, unknown reference, invalid syntax ve invalid capacity durumlarını yakala.
 ✅  Start/end için max_drones metadata'sını kapasite sınırlaması olarak uygulama.
 ✅ Her parsing hatasında satır numarası ve anlaşılır sebep göster.
-[ ] Parser için valid ve invalid input testleri yaz.
+✅ Parser için valid ve invalid input testleri yaz.
 
 nb_drones: 3
 start_hub: start 0 0
@@ -49,12 +49,12 @@ connection: B-goal
 
 Phase 3 — Graph Representation & Pathfinding
 Hedef: Drone'ların start ile end arasındaki geçerli yollarını bulmak.
-[ ] Graph class'ını adjacency list kullanarak oluştur.
-[ ] Zone ve Connection nesnelerini graph içerisinde sakla.
-[ ] Bidirectional connection erişimini doğrula.
+✅ Graph class'ını adjacency list kullanarak oluştur.
+✅ Zone ve Connection nesnelerini graph içerisinde sakla.
+✅ Bidirectional connection erişimini doğrula.
 [ ] Blocked zone'ları pathfinding dışında bırak.
-[ ] Start ile end arasında bağlantı olup olmadığını kontrol et.
-[ ] İlk olarak BFS ile basit shortest path algoritması geliştir.
+✅ Start ile end arasında bağlantı olup olmadığını kontrol et.
+✅ İlk olarak BFS ile basit shortest path algoritması geliştir.
 [ ] Restricted zone için 2, normal/priority zone için 1 movement cost uygula.
 [ ] Weighted shortest path için Dijkstra algoritmasını uygula.
 [ ] Eşit maliyetli yollar arasında priority zone tercihini tasarla.
@@ -63,9 +63,9 @@ Hedef: Drone'ların start ile end arasındaki geçerli yollarını bulmak.
 [ ] Pathfinding sonuçlarını tekrar kullanmak için caching ihtiyacını değerlendir.
 
 
-Algoritma	Görevi
-BFS	Basit, eşit maliyetli graph üzerinde en kısa yolu bulmak
-Dijkstra	Restricted zone gibi farklı movement cost'ları hesaba katmak
+Algoritma Görevi
+BFS	Basit: eşit maliyetli graph üzerinde en kısa yolu bulmak
+Dijkstra: Restricted zone gibi farklı movement cost'ları hesaba katmak
 Multi-path routing	Birden fazla drone'u farklı rotalara dağıtmak
 
 Önemli: En kısa yol, her zaman bütün drone'lar için en hızlı çözüm değildir. 

@@ -17,10 +17,12 @@ class RegularExpressions(Enum):
 
     METADATA_DICT_SPLIT_PATTERN = re.compile(r"([a-zA-Z_]+)\s*=\s*([^\s]+)")
 
+    _EXLUDED_MATCH = r"(?=[^-\s\[\]]*[A-Za-z])([^-\s\[\]]+)"
+
     HUB_SEARCH_PATTERN = re.compile(
-        r"(start_hub|hub|end_hub):\s*"
-        r"(?=[A-Za-z0-9_]*[A-Za-z])([A-Za-z0-9_]+)\s+"
-        r"(-?\d+)\s+(-?\d+)(?:\s*(\[[^\]]+\]))?"
+        rf"(start_hub|hub|end_hub):\s*"
+        rf"{_EXLUDED_MATCH}\s+"
+        rf"(-?\d+)\s+(-?\d+)(?:\s*(\[[^\]]+\]))?"
     )
 
     LINK_CAPACITY_PATTERN = re.compile(
@@ -28,10 +30,9 @@ class RegularExpressions(Enum):
     )
 
     CONNECTION_NAME_PATTERN = re.compile(
-        r"connection:\s*"
-        r"(?=[A-Za-z0-9_]*[A-Za-z])([A-Za-z0-9_]+)-"
-        r"(?=[A-Za-z0-9_]*[A-Za-z])([A-Za-z0-9_]+)"
-        r"(?:\s*(\[[^\]]+\]))?"
+        rf"connection:\s*"
+        rf"{_EXLUDED_MATCH}-{_EXLUDED_MATCH}"
+        rf"(?:\s*(\[[^\]]+\]))?"
     )
 
     DRONE_NB_SEARCH_PATTERN = re.compile(r"\s*(nb_drones:\s+)(\d+)\s*")
